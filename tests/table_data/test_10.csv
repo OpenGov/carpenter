@@ -1,0 +1,23 @@
+Titles,Year,Cost,,,,,
+Airports,2010,729,,,Year,2010,2011
+Ports and Harbors,,1327,,,Titles,Cost,
+Other,,1981,,,Airports,729,2765
+Planning,,810,,,Ports and Harbors,1327,198
+Construction and Engineering Regulation Enforcement,,1210,,,Other,1981,868
+Construction and Engineering Regulation Enforcement,,792,,,Planning,810,1316
+Redevelopment,,2488,,,Construction and Engineering Regulation Enforcement,1210,1634
+Housing,,1228,,,Construction and Engineering Regulation Enforcement,792,1133
+Employment,,457,,,Redevelopment,2488,627
+Community Promotion,,431,,,Housing,1228,2108
+Other,,2069,,,Employment,457,1910
+Airports,2011,2765,,,Community Promotion,431,730
+Ports and Harbors,,198,,,Other,2069,1984
+Other,,868,,,,,
+Planning,,1316,,,,,
+Construction and Engineering Regulation Enforcement,,1634,,,,,
+Construction and Engineering Regulation Enforcement,,1133,,,,,
+Redevelopment,,627,,,,,
+Housing,,2108,,,,,
+Employment,,1910,,,,,
+Community Promotion,,730,,,,,
+Other,,1984,,,,,
