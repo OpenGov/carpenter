@@ -1,1 +1,1 @@
-pydatawrap==1.2.0
+pydatawrap==1.2.1

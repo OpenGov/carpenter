@@ -53,7 +53,7 @@ setup(
     description = "A utility library which repairs and analyzes tablular data",
     install_requires = required,
     package_data = { "" : data_types },
-    dependency_links = ["https://github.com/OpenGov/python_data_wrap/tarball/v1.2.0#egg=pydatawrap-1.2.0"],
+    dependency_links = ["https://github.com/OpenGov/python_data_wrap/tarball/v1.2.1#egg=pydatawrap-1.2.1"],
     packages = packages,
     test_suite = "tests",
     zip_safe = False,

@@ -1,3 +1,6 @@
+# Make this available to other repositories to avoid version conflicts
+import datawrap
+
 import os
 import glob
 # Hack to get setup tools to correctly include all python files
