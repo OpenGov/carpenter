@@ -1,61 +1,46 @@
 import os
-import glob
 import shutil
-from setuptools import setup
+from setuptools import setup, find_packages
 
 def read(fname):
+    with open(fname) as fhandle:
+            return fhandle.read()
+
+def readMD(fname):
     # Utility function to read the README file.
-    with open(os.path.join(os.path.dirname(__file__), fname)) as fhandle:
-        return fhandle.read()
+    full_fname = os.path.join(os.path.dirname(__file__), fname)
+    if 'PANDOC_PATH' in os.environ:
+        import pandoc
+        pandoc.core.PANDOC_PATH = os.environ['PANDOC_PATH']
+        doc = pandoc.Document()
+        with open(full_fname) as fhandle:
+            doc.markdown = fhandle.read()
+        return doc.rst
+    else:
+        return read(fname)
 
-# Cleanup builds so changes don't persist into setup
-build_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "build"))
-dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "dist"))
-if (os.path.isdir(build_dir)):
-    shutil.rmtree(build_dir)
-if (os.path.isdir(dist_dir)):
-    shutil.rmtree(dist_dir)
-    
-# Taken from Python Cookbook
-# http://my.safaribooksonline.com/book/programming/python/0596001673/files/pythoncook-chp-4-sect-16
-# Credit: Trent Mick
-def path_split_all(path):
-    all_parts = []
-    while True:
-        parts = os.path.split(path)
-        if parts[0] == path:  # sentinel for absolute paths
-            all_parts.insert(0, parts[0])
-            break
-        elif parts[1] == path: # sentinel for relative paths
-            all_parts.insert(0, parts[1])
-            break
-        else:
-            path = parts[0]
-            all_parts.insert(0, parts[1])
-    return all_parts
-
-data_types = ["*.csv", "*.xls", "*.xlsx"]
-packages = ["carpenter"]
-packset = set()
-for extension in data_types+["__init__.py"]:
-    # Any submodules in fileparser
-    packset.update(".".join(path_split_all(module)[:-1]) 
-                   for module in glob.glob("carpenter/*/"+extension))
-packages.extend(packset)
-
-required = [req.strip() for req in read("requirements.txt").splitlines() if req.strip()]
+required = [req.strip() for req in read('requirements.txt').splitlines() if req.strip()]
 
 setup(
-    name = "Carpenter",
-    version = "1.0.0",
-    author = "Matthew Seal",
-    author_email = "mseal@opengov.us",
-    description = "A utility library which repairs and analyzes tablular data",
-    install_requires = required,
-    package_data = { "" : data_types },
-    dependency_links = ["https://github.com/OpenGov/python_data_wrap/tarball/v1.2.1#egg=pydatawrap-1.2.1"],
-    packages = packages,
-    test_suite = "tests",
-    zip_safe = False,
-    long_description=read("README.md"),
+    name='Carpenter',
+    version='1.0.0',
+    author='Matthew Seal',
+    author_email='mseal@opengov.us',
+    description='A utility library which repairs and analyzes tablular data',
+    long_description=readMD('README.md'),
+    install_requires=required,
+    license='LGPL 2.1',
+    packages=find_packages(),
+    test_suite='tests',
+    zip_safe=False,
+    url='https://github.com/OpenGov/carpenter',
+    download_url='https://github.com/OpenGov/carpenter/tarball/v1.0.0',
+    keywords=['tables', 'data', 'analysis', 'extraction'],
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Topic :: Utilities',
+        'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 2 :: Only'
+    ]
 )

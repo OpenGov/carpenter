@@ -1,5 +1,5 @@
 import sys
-from datawrap.tablewrap import TableTranpose, squarify_table
+from datawrap.tablewrap import TableTranspose, squarify_table
 from block import TableBlock, InvalidBlockError
 from flagable import Flagable
 from cellanalyzer import is_empty_cell, is_text_cell, is_num_cell, auto_convert_cell
@@ -303,8 +303,8 @@ class TableAnalyzer(Flagable):
         while(not checked_all and repeat):
             block_end[0] = max(block_end[0], possible_block_start[0])
             block_end[1] = max(block_end[1], current_col)
-            table_column = TableTranpose(table)[current_col]
-            used_column = TableTranpose(used_cells)[current_col]
+            table_column = TableTranspose(table)[current_col]
+            used_column = TableTranspose(used_cells)[current_col]
             # We need to find a non empty cell before we can stop
             blank_start = is_empty_cell(table_column[possible_block_start[0]])
             # Unless we have assume_complete_blocks set to True
@@ -363,8 +363,8 @@ class TableAnalyzer(Flagable):
             if used_row[column_index]:
                 break
             elif is_empty_cell(table_row[column_index]):
-                table_column = TableTranpose(table)[column_index]
-                used_column = TableTranpose(used_cells)[column_index]
+                table_column = TableTranspose(table)[column_index]
+                used_column = TableTranspose(used_cells)[column_index]
                 found_cell = False
                 for row_index in range(block_start[0], block_end[0]):
                     if not is_empty_cell(table_column[row_index]):

@@ -4,7 +4,7 @@ import bootstrap
 import re
 from flagable import Flagable
 from cellanalyzer import is_empty_cell, is_text_cell, is_num_cell, get_cell_type, check_cell_type
-from datawrap.tablewrap import TableTranpose
+from datawrap.tablewrap import TableTranspose
 from carpenter.regex import allregex
 
 class InvalidBlockError(ValueError):
@@ -327,7 +327,7 @@ class BlockValidator(Flagable):
         # Repair any title columns
         check_for_title = True
         for column_index in range(self.start[1], self.end[1]):
-            table_column = TableTranpose(self.table)[column_index]
+            table_column = TableTranspose(self.table)[column_index]
             column_start = table_column[self.start[0]]
             
             # Only iterate through columns starting with a blank cell
@@ -361,7 +361,7 @@ class BlockValidator(Flagable):
         Same as _fill_row_holes but for columns.
         ''' 
         for column_index in range(self.start[1], self.end[1]):
-            table_column = TableTranpose(self.table)[column_index]
+            table_column = TableTranspose(self.table)[column_index]
             column_start = table_column[self.start[0]]
             if is_text_cell(column_start):
                 self._check_fill_title_column(column_index)
@@ -401,7 +401,7 @@ class BlockValidator(Flagable):
         _validate_rows should update used_cells.
         '''  
         for column_index in range(self.start[1], self.end[1]):
-            table_column = TableTranpose(self.table)[column_index]
+            table_column = TableTranspose(self.table)[column_index]
             
             column_type = None
             if self.end[0] > self.start[0]:
@@ -435,7 +435,7 @@ class BlockValidator(Flagable):
         '''
         Same as _stringify_row but for columns.
         ''' 
-        table_column = TableTranpose(self.table)[column_index]
+        table_column = TableTranspose(self.table)[column_index]
         prior_cell = None
         for row_index in range(self.start[0], self.end[0]):
             cell, changed = self._check_interpret_cell(table_column[row_index], prior_cell, row_index, column_index)
@@ -486,8 +486,8 @@ class BlockValidator(Flagable):
         Same as _check_fill_title_row but for columns.
         ''' 
         # Determine if the whole column is titles
-        table_column = TableTranpose(self.table)[column_index]
-        prior_column = TableTranpose(self.table)[column_index-1] if column_index > 0 else table_column
+        table_column = TableTranspose(self.table)[column_index]
+        prior_column = TableTranspose(self.table)[column_index-1] if column_index > 0 else table_column
         for row_index in range(self.start[0], self.end[0]):
             if is_num_cell(table_column[row_index]) or is_num_cell(prior_column[row_index]):
                 return
@@ -519,7 +519,7 @@ class BlockValidator(Flagable):
         '''
         Same as _check_stringify_year_row but for columns.
         '''  
-        table_column = TableTranpose(self.table)[column_index]
+        table_column = TableTranspose(self.table)[column_index]
         # State trackers
         prior_year = None
         increasing_years = None
