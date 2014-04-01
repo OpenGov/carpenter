@@ -1,8 +1,8 @@
 # This import fixes sys.path issues
-import bootstrap
+import parentpath
 
 import re
-from carpenter.regex import allregex
+from regex import allregex
 from flagable import Flagable
 
 UNITS_DOLLAR = '$'
