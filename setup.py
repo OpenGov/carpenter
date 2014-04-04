@@ -1,10 +1,9 @@
 import os
-import shutil
 from setuptools import setup, find_packages
 
 def read(fname):
     with open(fname) as fhandle:
-            return fhandle.read()
+        return fhandle.read()
 
 def readMD(fname):
     # Utility function to read the README file.
@@ -20,10 +19,10 @@ def readMD(fname):
         return read(fname)
 
 required = [req.strip() for req in read('requirements.txt').splitlines() if req.strip()]
-
+version = '1.0.0'
 setup(
     name='Carpenter',
-    version='1.0.0',
+    version=version,
     author='Matthew Seal',
     author_email='mseal@opengov.us',
     description='A utility library which repairs and analyzes tablular data',
@@ -34,7 +33,7 @@ setup(
     test_suite='tests',
     zip_safe=False,
     url='https://github.com/OpenGov/carpenter',
-    download_url='https://github.com/OpenGov/carpenter/tarball/v1.0.0',
+    download_url='https://github.com/OpenGov/carpenter/tarball/v' + version,
     keywords=['tables', 'data', 'analysis', 'extraction'],
     classifiers=[
         'Development Status :: 3 - Alpha',
