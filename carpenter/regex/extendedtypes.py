@@ -45,3 +45,19 @@ _percent_numerical_impl = (
     r"(?:%+)$")
 
 percent_numerical_regex = re.compile(_percent_numerical_impl)
+
+'''
+Matches for integer or float types that end in a - or + sign
+'''
+_estimate_numerical_impl = (
+    # Can start with or without a '-+'
+    r"([-+]?"
+    r"[0-9]+"
+    r"(?:,[0-9]{3})+"
+    # That can optionally end with a '.' and number
+    r"(?:\.[0-9]*)?)"
+    r"([-+])$")
+
+estimate_numerical_regex = re.compile(_estimate_numerical_impl)
+
+
