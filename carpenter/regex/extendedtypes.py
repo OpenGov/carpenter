@@ -32,3 +32,18 @@ _comma_sep_numerical_impl = (
     _not_followed_impl+r")")
 
 comma_sep_numerical_regex = re.compile(_comma_sep_numerical_impl)
+
+'''
+Matches for integer or float types that end in a percentage sign
+'''
+_percent_numerical_impl = (
+    # Can start with or without a '-+'
+    r"([-+]?"
+    r"[0-9]+"
+    # That can optionally end with a '.' and number
+    r"(?:\.[0-9]*)?)"
+    r"(?:%+)$"
+    
+)
+
+percent_numerical_regex = re.compile(_percent_numerical_impl)

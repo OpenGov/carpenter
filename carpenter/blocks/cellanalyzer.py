@@ -35,8 +35,11 @@ def get_cell_type(cell):
     cell_type = None
     if isinstance(cell, basestring) and cell:
         cell_type = basestring
-    elif isinstance(cell, (int, float)):
-        cell_type = (int, float)
+    elif isinstance(cell, int):
+        cell_type = int
+    elif isinstance(cell, float):
+        cell_type = float
+        
     return cell_type
 
 def check_cell_type(cell, cell_type):
@@ -163,6 +166,11 @@ def auto_convert_numeric_string_cell(flagable, cell_str, position, worksheet, fl
         else:
             flagable.flag_change(flags, flag_level, worksheet, position)
             return float(cell_str)
+    def numerify_percentage_str(cell_str, flag_level='minor', flag_text=""):
+        flagable.flag_change(flags, flag_level, position, worksheet)
+        return float(cell_str) / 100
+    
+    
     
     def convert_to_int_or_float(cell_str, flag_level='minor', flag_text=""):
         if not cell_str:
@@ -175,6 +183,11 @@ def auto_convert_numeric_string_cell(flagable, cell_str, position, worksheet, fl
         elif re.search(allregex.comma_sep_numerical_regex, cell_str):
             smashed_cell = ''.join(cell_str.split(','))
             conversion = numerify_str(smashed_cell, flag_level, flag_text)
+        # Ends in percentage sign
+        elif re.search(allregex.percent_numerical_regex, cell_str):
+            cell_str = allregex.percent_numerical_regex.search(cell_str).group(1)
+            conversion = numerify_percentage_str(cell_str, flag_level, flag_text)
+        
         # Begins with money symbol?
         elif re.search(allregex.begins_with_monetary_symbol_regex, cell_str):
             symbol = cell_str[0]
