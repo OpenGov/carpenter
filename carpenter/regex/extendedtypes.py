@@ -42,8 +42,6 @@ _percent_numerical_impl = (
     r"[0-9]+"
     # That can optionally end with a '.' and number
     r"(?:\.[0-9]*)?)"
-    r"(?:%+)$"
-    
-)
+    r"(?:%+)$")
 
 percent_numerical_regex = re.compile(_percent_numerical_impl)
