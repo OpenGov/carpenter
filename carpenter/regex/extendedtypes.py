@@ -45,7 +45,6 @@ _percent_numerical_impl = (
     r"(?:[ ]*$)"
     )
 
-
 percent_numerical_regex = re.compile(_percent_numerical_impl)
 
 '''
@@ -59,7 +58,7 @@ _estimate_numerical_impl = (
     r"(?:[-+]+)"
     r"(?:[ ]*$)"
     )
-print _percent_numerical_impl
+
 estimate_numerical_regex = re.compile(_estimate_numerical_impl)
 
 
