@@ -34,6 +34,8 @@ class RegexTypesTest(unittest.TestCase):
                            "-1.0", "-1.", "-.1",
                            "12345.", "123.45", ".12345",
                            "-12345.", "-123.45", "-.12345"]
+        self.percentage_strs = ["0%", "0.0%", "10%", "1000%", "-23%",
+                                "-100%", "-120.35%",  "+120.35%"]
         self.comma_sep_strs = ["1,234", "1,234.", "1,234.5", "1,234.5678", 
                                "12,345", "123,456", "1,234,567.89"]
         # Python can't handle floating exponentials in the num-'e'-num format
@@ -259,14 +261,19 @@ class RegexTypesTest(unittest.TestCase):
                                      prefix+check_str+suffix), 
                            "String '"+prefix+check_str+suffix+"' should have returned "+
                            self.none_check_str(assert_func))
-                    
-        self.run_regex_test(regex=allregex.comma_sep_numerical_regex, 
-                            int_assert_chooser=lambda p,c,s: self.assertIsNone,
-                            float_assert_chooser=lambda p,c,s: self.assertIsNone,
-                            exp_assert_chooser=lambda p,c,s: self.assertIsNone,
-                            bool_assert_chooser=lambda p,c,s,t: self.assertIsNone,
-                            additional_tests=[comma_check])
-    
+
+    def test_percentage_regex(self):
+        '''Percentage values'''
+        def percentage_check():
+            for check_str in self.percentage_strs:
+                assert_func = self.assertIsNotNone
+                assert_func(re.search(allregex.percent_numerical_regex, 
+                                    check_str), 
+                           "String '"+check_str+"' should have returned "+
+                           self.none_check_str(assert_func))
+                print self.none_check_str(assert_func)
+        percentage_check()
+
     def test_contains_bool_regex(self):
         '''Bool Tests'''
         self.run_regex_test(regex=allregex.contains_bool_regex, 

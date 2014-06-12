@@ -35,12 +35,11 @@ def get_cell_type(cell):
     cell_type = None
     if isinstance(cell, basestring) and cell:
         cell_type = basestring
-    elif isinstance(cell, int):
-        cell_type = int
-    elif isinstance(cell, float):
-        cell_type = float
+    elif isinstance(cell, (int, float)):
+        cell_type = (int, float)
         
     return cell_type
+
 
 def check_cell_type(cell, cell_type):
     '''
