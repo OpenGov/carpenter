@@ -262,17 +262,31 @@ class RegexTypesTest(unittest.TestCase):
                            "String '"+prefix+check_str+suffix+"' should have returned "+
                            self.none_check_str(assert_func))
 
+        self.run_regex_test(regex=allregex.comma_sep_numerical_regex, 
+                            int_assert_chooser=lambda p,c,s: self.assertIsNone,
+                            float_assert_chooser=lambda p,c,s: self.assertIsNone,
+                            exp_assert_chooser=lambda p,c,s: self.assertIsNone,
+                            bool_assert_chooser=lambda p,c,s,t: self.assertIsNone,
+                            additional_tests=[comma_check])
+
     def test_percentage_regex(self):
         '''Percentage values'''
-        def percentage_check():
+        def percentage_check(prefix, suffix):
             for check_str in self.percentage_strs:
-                assert_func = self.assertIsNotNone
+                if prefix_suffix_whitespace(prefix, suffix):
+                    assert_func = self.assertIsNotNone
+                else:
+                    assert_func = self.assertIsNone
                 assert_func(re.search(allregex.percent_numerical_regex, 
-                                    check_str), 
-                           "String '"+check_str+"' should have returned "+
+                                     prefix+check_str+suffix), 
+                           "String '"+prefix+check_str+suffix+"' should have returned "+
                            self.none_check_str(assert_func))
-                print self.none_check_str(assert_func)
-        percentage_check()
+        self.run_regex_test(regex=allregex.percent_numerical_regex, 
+                            int_assert_chooser=lambda p,c,s: self.assertIsNone,
+                            float_assert_chooser=lambda p,c,s: self.assertIsNone,
+                            exp_assert_chooser=lambda p,c,s: self.assertIsNone,
+                            bool_assert_chooser=lambda p,c,s,t: self.assertIsNone,
+                            additional_tests=[percentage_check])
 
     def test_contains_bool_regex(self):
         '''Bool Tests'''
