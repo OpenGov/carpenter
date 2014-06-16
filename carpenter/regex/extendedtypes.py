@@ -32,3 +32,34 @@ _comma_sep_numerical_impl = (
     _not_followed_impl+r")")
 
 comma_sep_numerical_regex = re.compile(_comma_sep_numerical_impl)
+
+'''
+Matches for integer or float types that end in a percentage sign
+'''
+_percent_numerical_impl = (
+    r"(?:"+_not_prefixed_impl+")"
+    r"([-+]?"
+    r"[0-9]+"
+    r"(?:\.[0-9]*)?)"
+    r"(?:%+)"
+    r"(?:"+_not_followed_impl+")"
+    )
+
+percent_numerical_regex = re.compile(_percent_numerical_impl)
+
+'''
+Matches for integer or float types that end in a - or + sign
+'''
+_estimate_numerical_impl = (
+    r"(?:"+_not_prefixed_impl+")"
+    r"([-+]?"
+    r"[0-9]{1,3}"
+    r"(?:[,]?[0-9]{3})*"
+    r"(?:\.[0-9]*)?)"
+    r"(?:[-+]+)"
+    r"(?:"+_not_followed_impl+")"
+    )
+
+estimate_numerical_regex = re.compile(_estimate_numerical_impl)
+
+
