@@ -186,6 +186,7 @@ def auto_convert_numeric_string_cell(flagable, cell_str, position, worksheet, fl
             conversion = numerify_percentage_str(cell_str, flag_level, flag_text)
         # Ends in + or - sign (estimate)?
         elif re.search(allregex.estimate_numerical_regex, cell_str):
+            
             cell_str = cell_str[:-1].replace(",","")
             conversion = numerify_str(cell_str, flag_level, flag_text)
         # Begins with money symbol?

@@ -36,7 +36,7 @@ class RegexTypesTest(unittest.TestCase):
                            "-12345.", "-123.45", "-.12345"]
         self.percentage_strs = ["0%", "0.0%", "10%", "1000%", "-23%",
                                 "-100%", "-120.35%",  "+120.35%"]
-        self.estimate_strs = ["10-", "10.0-", "10+", "1000.0+"]
+        self.estimate_strs = ["10-", "10.0-", "10+", "1,000.0+"]
         self.comma_sep_strs = ["1,234", "1,234.", "1,234.5", "1,234.5678", 
                                "12,345", "123,456", "1,234,567.89"]
         # Python can't handle floating exponentials in the num-'e'-num format
