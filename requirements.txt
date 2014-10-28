@@ -1,2 +1,2 @@
 allset<2.0.0
-pydatawrap>=1.2.1, <2.0.0
+pydatawrap>=1.2.4, <2.0.0

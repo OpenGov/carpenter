@@ -95,5 +95,8 @@ cache
 # Logs
 *.log
 
+# Tmp
+~*
+
 /doc/parser
 /doc/_build
