@@ -47,7 +47,7 @@ class TableAnalyzer(Flagable):
         self.flags_by_table = []
         self.units_by_table = []
         for worksheet,rtable in enumerate(self.raw_tables):
-            ptable, flags, units = self.preprocessPass(rtable, worksheet)
+            ptable, flags, units = self.preprocess_pass(rtable, worksheet)
             self.processed_tables.append(ptable)
             self.flags_by_table.append(flags)
             self.units_by_table.append(units)
@@ -84,7 +84,7 @@ class TableAnalyzer(Flagable):
                 if not self.assume_complete_blocks:
                     self.fill_in_table(ptable, worksheet, flags)
 
-                self.processed_blocks.extend(self._findBlocks(
+                self.processed_blocks.extend(self._find_blocks(
                         ptable, worksheet, flags, units,
                         { 'worksheet', worksheet }))
 
@@ -93,7 +93,7 @@ class TableAnalyzer(Flagable):
             # After execution, reset assume_complete_blocks back
             self.assume_complete_blocks = _track_assume_blocks
 
-    def preprocessPass(self, table, worksheet):
+    def preprocess_pass(self, table, worksheet):
         '''
         Performs a preprocess pass of the table to attempt naive conversions
         of data and to record the initial types of each cell.
@@ -129,8 +129,8 @@ class TableAnalyzer(Flagable):
                 if len(row) < max_row:
                     row.extend([None]*(max_row-len(row)))
 
-    def _findBlocks(self, converted_table, worksheet, flags, units,
-                    block_meta=None, start_pos=None, end_pos=None):
+    def _find_blocks(self, converted_table, worksheet, flags, units,
+                     block_meta=None, start_pos=None, end_pos=None):
         '''
         A block is considered any region where we have the
         following structure:
