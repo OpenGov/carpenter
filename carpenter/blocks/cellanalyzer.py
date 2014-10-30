@@ -29,7 +29,7 @@ def is_num_cell(cell):
 
 def get_cell_type(cell):
     '''
-    Returns a type to be used in table cell analysis. This is either 
+    Returns a type to be used in table cell analysis. This is either
     'basestring' or '(int, float)'.
     '''
     cell_type = None
@@ -37,14 +37,14 @@ def get_cell_type(cell):
         cell_type = basestring
     elif isinstance(cell, (int, float)):
         cell_type = (int, float)
-        
+
     return cell_type
 
 
 def check_cell_type(cell, cell_type):
     '''
     Checks the cell type to see if it represents the cell_type passed in.
-    
+
     Args:
         cell_type: The type id for a cell match or None for empty match.
     '''
@@ -52,33 +52,33 @@ def check_cell_type(cell, cell_type):
         return cell == None or (isinstance(cell, basestring) and not cell)
     else:
         return isinstance(cell, cell_type)
-    
+
 def auto_convert_cell_no_flags(cell, units=None, parens_as_neg=True):
     '''
     Performs a first step conversion of the cell to check
     it's type or try to convert if a valid conversion exists.
     This version of conversion doesn't flag changes nor store
     cell units.
-    
+
     Args:
         units: The dictionary holder for cell units.
-        parens_as_neg: Converts numerics surrounded by parens to 
+        parens_as_neg: Converts numerics surrounded by parens to
             negative values
     '''
     units = units if units != None else {}
-    return auto_convert_cell(flagable=Flagable(), cell=cell, position=None, worksheet=0, 
+    return auto_convert_cell(flagable=Flagable(), cell=cell, position=None, worksheet=0,
                              flags={}, units=units, parens_as_neg=parens_as_neg)
 
 def auto_convert_cell(flagable, cell, position, worksheet, flags, units, parens_as_neg=True):
     '''
     Performs a first step conversion of the cell to check
     it's type or try to convert if a valid conversion exists.
-    
+
     Args:
         parens_as_neg: Converts numerics surrounded by parens to negative values
     '''
     conversion = cell
-    
+
     # Is an numeric?
     if isinstance(cell, (int, float)):
         pass
@@ -88,13 +88,13 @@ def auto_convert_cell(flagable, cell, position, worksheet, flags, units, parens_
         if not cell:
             conversion = None
         else:
-            conversion = auto_convert_string_cell(flagable, cell, position, worksheet, 
+            conversion = auto_convert_string_cell(flagable, cell, position, worksheet,
                                                   flags, units, parens_as_neg=parens_as_neg)
     # Is something else?? Convert to string
     elif cell != None:
         # Since we shouldn't get this event from most file types,
         # make this a warning level conversion flag
-        flagable.flag_change(flags, 'warning', position, worksheet, 
+        flagable.flag_change(flags, 'warning', position, worksheet,
                              flagable.FLAGS['unknown-to-string'])
         conversion = str(cell)
         # Empty cell?
@@ -103,20 +103,20 @@ def auto_convert_cell(flagable, cell, position, worksheet, flags, units, parens_
     else:
         # Otherwise we have an empty cell
         pass
-    
+
     return conversion
 
-def auto_convert_string_cell(flagable, cell_str, position, worksheet, flags, 
+def auto_convert_string_cell(flagable, cell_str, position, worksheet, flags,
                              units, parens_as_neg=True):
     '''
     Handles the string case of cell and attempts auto-conversion
     for auto_convert_cell.
-    
+
     Args:
         parens_as_neg: Converts numerics surrounded by parens to negative values
     '''
     conversion = cell_str.strip()
-    
+
     # Wrapped?
     if re.search(allregex.control_wrapping_regex, cell_str):
         # Drop the wrapping characters
@@ -125,34 +125,34 @@ def auto_convert_string_cell(flagable, cell_str, position, worksheet, flags,
         neg_mult = False
         # If the wrapping characters are '(' and ')' and the interior is a number,
         # then the number should be interpreted as a negative value
-        if (stripped_cell[0] == '(' and stripped_cell[-1] == ')' and 
+        if (stripped_cell[0] == '(' and stripped_cell[-1] == ')' and
                 re.search(allregex.contains_numerical_regex, mod_cell_str)):
             # Flag for conversion to negative
             neg_mult = True
-        flagable.flag_change(flags, 'interpreted', position, worksheet, 
+        flagable.flag_change(flags, 'interpreted', position, worksheet,
                             flagable.FLAGS['removed-wrapping'])
         # Try again without wrapping
-        converted_value = auto_convert_cell(flagable, mod_cell_str, position, 
+        converted_value = auto_convert_cell(flagable, mod_cell_str, position,
                                             worksheet, flags, units)
         neg_mult = neg_mult and check_cell_type(converted_value, get_cell_type(0))
         if neg_mult and parens_as_neg:
-            flagable.flag_change(flags, 'interpreted', position, worksheet, 
+            flagable.flag_change(flags, 'interpreted', position, worksheet,
                                  flagable.FLAGS['converted-wrapping-to-neg'])
         return -converted_value if neg_mult else converted_value
     # Is a string containing numbers?
     elif re.search(allregex.contains_numerical_regex, cell_str):
-        conversion = auto_convert_numeric_string_cell(flagable, conversion, position, 
+        conversion = auto_convert_numeric_string_cell(flagable, conversion, position,
                                                       worksheet, flags, units)
     elif re.search(allregex.bool_regex, cell_str):
-        flagable.flag_change(flags, 'interpreted', position, worksheet, 
+        flagable.flag_change(flags, 'interpreted', position, worksheet,
                              flagable.FLAGS['bool-to-int'])
         conversion = 1 if re.search(allregex.true_bool_regex, cell_str) else 0
-        
+
     return conversion
 
 def auto_convert_numeric_string_cell(flagable, cell_str, position, worksheet, flags, units):
     '''
-    Handles the string containing numeric case of cell and attempts 
+    Handles the string containing numeric case of cell and attempts
     auto-conversion for auto_convert_cell.
     '''
     def numerify_str(cell_str, flag_level='minor', flag_text=""):
@@ -186,7 +186,7 @@ def auto_convert_numeric_string_cell(flagable, cell_str, position, worksheet, fl
             conversion = numerify_percentage_str(cell_str, flag_level, flag_text)
         # Ends in + or - sign (estimate)?
         elif re.search(allregex.estimate_numerical_regex, cell_str):
-            
+
             cell_str = cell_str[:-1].replace(",","")
             conversion = numerify_str(cell_str, flag_level, flag_text)
         # Begins with money symbol?
@@ -194,7 +194,7 @@ def auto_convert_numeric_string_cell(flagable, cell_str, position, worksheet, fl
             symbol = cell_str[0]
             cell_str = cell_str[1:]
             try:
-                conversion = convert_to_int_or_float(cell_str, 'interpreted', 
+                conversion = convert_to_int_or_float(cell_str, 'interpreted',
                         flagable.FLAGS['monetary-removal'])
                 if re.search(allregex.contains_dollar_symbol_regex, symbol):
                     units[position] = UNITS_DOLLAR
@@ -210,7 +210,7 @@ def auto_convert_numeric_string_cell(flagable, cell_str, position, worksheet, fl
         elif re.search(allregex.ends_with_thousands_scaling_regex, cell_str):
             cell_str = cell_str.rstrip()[:-1]
             try:
-                conversion = 1000*convert_to_int_or_float(cell_str, 'interpreted', 
+                conversion = 1000*convert_to_int_or_float(cell_str, 'interpreted',
                                   flagable.FLAGS['thousands-convert'])
             except ValueError:
                 flagable.flag_change(flags, 'warning', position, worksheet,
@@ -222,7 +222,7 @@ def auto_convert_numeric_string_cell(flagable, cell_str, position, worksheet, fl
             else:
                 cell_str = cell_str[:-1]
             try:
-                conversion = 1000000*convert_to_int_or_float(cell_str, 'interpreted', 
+                conversion = 1000000*convert_to_int_or_float(cell_str, 'interpreted',
                         flagable.FLAGS['millions-convert'])
             except ValueError:
                 flagable.flag_change(flags, 'warning', position, worksheet,
@@ -230,8 +230,8 @@ def auto_convert_numeric_string_cell(flagable, cell_str, position, worksheet, fl
         else:
             raise ValueError("Cannot convert cell")
         return conversion
-            
-            
+
+
     # Try converting
     try:
         return convert_to_int_or_float(cell_str)
