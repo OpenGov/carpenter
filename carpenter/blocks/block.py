@@ -37,7 +37,7 @@ class TableBlock(Flagable):
         self.start = block_start
         self.end = block_end
         self.complete_block = complete_block
-        self.max_title_row = min(self.end[0], self.start[0] + max_title_rows)
+        self.max_title_row = min(self.end[0], self.start[0] + int(max_title_rows))
         self.flags = flags if flags != None else {}
         self.units = units if units != None else {}
         self.worksheet = worksheet

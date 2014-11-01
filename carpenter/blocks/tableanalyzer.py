@@ -40,7 +40,7 @@ class TableAnalyzer(Flagable):
         self.parens_as_neg = parens_as_neg
         self.skippable_rows = skippable_rows
         self.skippable_columns = skippable_columns
-        self.max_title_rows = max_title_rows
+        self.max_title_rows = int(max_title_rows)
 
     def preprocess(self):
         '''
