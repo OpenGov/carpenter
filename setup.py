@@ -19,7 +19,7 @@ def readMD(fname):
         return read(fname)
 
 required = [req.strip() for req in read('requirements.txt').splitlines() if req.strip()]
-version = '1.0.1'
+version = '1.0.2'
 setup(
     name='Carpenter',
     version=version,

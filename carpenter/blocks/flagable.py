@@ -18,26 +18,29 @@ class Flagable(object):
     # when they are generated on the fly and gives consistency
     # across functions when the message is changed.
     _ACTUAL_FLAGS = {
-         None : "",
-         '' : "",
-         '0-size' : "Block width and/or height is 0",
-         '1-size' : "Block width and/or height is 1",
-         'used' : "Cell already used by another block",
-         'unexpected-change' : "Cell type unexpectedly changed",
-         'converted-to-string' : "Converted non-string title to string",
-         'copied-title' : "Copied prior title into cell",
-         'unknown-to-string' : "Unknown cell type converted to string",
-         'removed-wrapping' : "Removed wrapping",
-         'converted-wrapping-to-neg' : "Removed parenthesis wrapping and swapped sign of value",
-         'bool-to-int' : "Boolean to integer",
-         'empty-to-zero-string' : "Converted empty string to 0",
-         'monetary-removal' : "Converted string beginning with monetary symbol to numeric",
-         'failed-monetary-convert' : "Unable to convert numeric string beginning with monetary symbol to numeric",
-         'thousands-convert' : "Converted string ending in 'k' to numeric",
-         'failed-thousands-convert' : "Unable to convert numeric string ending in 'k' to numeric",
-         'millions-convert' : "Converted string ending in 'M' to numeric",
-         'failed-millions-convert' : "Unable to convert numeric string ending in 'M' to numeric",
-         'failed-convert-numeric-string' : "Unable to convert string containing numeric to pure numeric"}
+        None : "",
+        '' : "",
+        '0-size' : "Block width and/or height is 0",
+        '1-size' : "Block width and/or height is 1",
+        'used' : "Cell already used by another block",
+        'unexpected-change' : "Cell type unexpectedly changed",
+        'converted-to-string' : "Converted non-string title to string",
+        'copied-title' : "Copied prior title into cell",
+        'unknown-to-string' : "Unknown cell type converted to string",
+        'removed-wrapping' : "Removed wrapping",
+        'converted-wrapping-to-neg' : "Removed parenthesis wrapping and swapped sign of value",
+        'bool-to-int' : "Boolean to integer",
+        'empty-to-zero-string' : "Converted empty string to 0",
+        'monetary-removal' : "Converted string beginning with monetary symbol to numeric",
+        'failed-monetary-convert' : "Unable to convert numeric string beginning with monetary symbol to numeric",
+        'thousands-convert' : "Converted string ending in 'k' to numeric",
+        'failed-thousands-convert' : "Unable to convert numeric string ending in 'k' to numeric",
+        'millions-convert' : "Converted string ending in 'M' to numeric",
+        'failed-millions-convert' : "Unable to convert numeric string ending in 'M' to numeric",
+        'failed-convert-numeric-string' : "Unable to convert string containing numeric to pure numeric",
+        'skipped-row': "Row skipped by input request",
+        'skipped-column': "Column skipped by input request"
+    }
 
     # Give FLAGS a default error code, in case someone misspells an input
     FLAGS = collections.defaultdict(lambda: "Unrecognized error code")

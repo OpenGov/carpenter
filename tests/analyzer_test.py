@@ -198,7 +198,7 @@ class TableAnalyzerTest(unittest.TestCase):
         test_number = 11
         num_expected_tables = 1
         num_expected_blocks = 4
-        expected_flag = ['interpreted', 'minor', 'minor', 'interpreted']
+        expected_flag = ['interpreted', 'minor', 'warning', 'interpreted']
         self.compare_conversion(test_number, expected_flag,
                                num_expected_tables, num_expected_blocks)
 
