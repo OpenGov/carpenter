@@ -26,17 +26,21 @@ class TableAnalyzerTest(unittest.TestCase):
         Helper for loading data with an unspecified extension
         '''
         try:
-            return tableloader.read(basename+".csv")
-        except IOError:
+            return tableloader.read(basename)
+        except (IOError, ValueError):
             try:
-                return tableloader.read(basename+".xlsx")
+                return tableloader.read(basename+".csv")
             except IOError:
                 try:
-                    return tableloader.read(basename+".xls")
+                    return tableloader.read(basename+".xlsx")
                 except IOError:
-                    raise ValueError("Cannot load any data with base name '"+basename+"'")
+                    try:
+                        return tableloader.read(basename+".xls")
+                    except IOError:
+                        raise ValueError("Cannot load any data with base name '"+basename+"'")
 
-    def load_data_number(self, test_number, complete_blocks_test=False):
+    def load_data_number(self, test_number, complete_blocks_test=False, overwrite_expect=None,
+                         **special_rules):
         '''
         Loads the input and expected output data for a particular
         test run.
@@ -45,9 +49,14 @@ class TableAnalyzerTest(unittest.TestCase):
             raw_file_name, expect_file_name = self.test_single_block_file_pairs[test_number]
         else:
             raw_file_name, expect_file_name = self.test_block_file_pairs[test_number]
-        raw_table_analyzer = tableanalyzer.TableAnalyzer(self.try_load_data(raw_file_name))
+        if overwrite_expect:
+            expect_file_name = overwrite_expect
+        raw_table_analyzer = tableanalyzer.TableAnalyzer(self.try_load_data(raw_file_name), **special_rules)
         convert_expect = self.try_load_data(expect_file_name)
         return raw_table_analyzer, convert_expect
+
+    def none_to_empty(self, cell):
+        return cell if cell is not None else ''
 
     def compare_block(self, result_block, expect_block):
         self.assertEqual(len(result_block), len(expect_block))
@@ -55,16 +64,17 @@ class TableAnalyzerTest(unittest.TestCase):
             self.assertEqual(len(result_block[row_index]), len(expect_block[row_index]))
             for column_index in range(len(result_block[row_index])):
                 try:
-                    self.assertEqual(str(result_block[row_index][column_index]).strip(),
-                                     str(expect_block[row_index][column_index]).strip())
+                    self.assertEqual(str(self.none_to_empty(result_block[row_index][column_index])).strip(),
+                                     str(self.none_to_empty(expect_block[row_index][column_index])).strip())
                 except:
-                    self.assertEqual(result_block[row_index][column_index],
-                                     expect_block[row_index][column_index])
+                    self.assertEqual(self.none_to_empty(result_block[row_index][column_index]),
+                                     self.none_to_empty(expect_block[row_index][column_index]))
 
     def compare_conversion(self, test_number, expected_word_flag, num_expected_tables,
-                           num_expected_blocks, complete_blocks_test=False):
+                           num_expected_blocks, complete_blocks_test=False, compare_raw=False,
+                           overwrite_expect=None, **special_rules):
         raw_table_analyzer, convert_expect = self.load_data_number(
-            test_number, complete_blocks_test)
+            test_number, complete_blocks_test, overwrite_expect, **special_rules)
         self.assertEqual(len(raw_table_analyzer.raw_tables), num_expected_tables)
         self.assertEqual(len(convert_expect), num_expected_blocks,
                          "Number of expected blocks '%s' does not match "
@@ -81,11 +91,13 @@ class TableAnalyzerTest(unittest.TestCase):
 
             for block_index in range(num_expected_blocks):
                 block = blocks[block_index]
-                self.assertEqual(block.get_worst_flag_level(),
-                                 expected_word_flag[block_index])
+                self.assertEqual(block.get_worst_flag_level(), expected_word_flag[block_index])
                 expect_block = convert_expect[block_index]
 
-                result_block = block.convert_to_row_table(add_units=False)
+                if compare_raw:
+                    result_block = block.copy_raw_block()
+                else:
+                    result_block = block.convert_to_row_table(add_units=False)
                 self.compare_block(result_block, expect_block)
         except:
             if block:
@@ -111,6 +123,46 @@ class TableAnalyzerTest(unittest.TestCase):
         num_expected_blocks = 1
         expected_flag = ['minor']
         self.compare_conversion(test_number, expected_flag, num_expected_tables, num_expected_blocks)
+
+    def test_basic_table_minus_row_2(self):
+        '''Test test_0.csv => test_0_skip_row_2_output.csv'''
+        test_number = 0
+        num_expected_tables = 1
+        num_expected_blocks = 1
+        expected_flag = ['warning']
+        self.compare_conversion(test_number, expected_flag, num_expected_tables, num_expected_blocks,
+            overwrite_expect=os.path.join(self.data_dir, "test_0_skip_row_2_output"),
+            skippable_rows={0: [2]})
+
+    def test_basic_table_minus_row_2_raw_block(self):
+        '''Test test_0.csv => test_0_skip_row_2_rblock_output.csv'''
+        test_number = 0
+        num_expected_tables = 1
+        num_expected_blocks = 1
+        expected_flag = ['warning']
+        self.compare_conversion(test_number, expected_flag, num_expected_tables, num_expected_blocks,
+            overwrite_expect=os.path.join(self.data_dir, "test_0_skip_row_2_rblock_output"),
+            skippable_rows={0: [2]}, compare_raw=True)
+
+    def test_basic_table_minus_row_2_raw_block_no_gap(self):
+        '''Test test_0.csv => test_0_skip_row_2_rblock_no_gap_output.xlsx'''
+        test_number = 0
+        num_expected_tables = 1
+        num_expected_blocks = 2
+        expected_flag = ['minor', 'minor']
+        self.compare_conversion(test_number, expected_flag, num_expected_tables, num_expected_blocks,
+            overwrite_expect=os.path.join(self.data_dir, "test_0_skip_row_2_rblock_no_gap_output"),
+            skippable_rows={0: [2]}, blank_repeat_threshold=0, compare_raw=True)
+
+    def test_basic_table_minus_column_3_raw_block(self):
+        '''Test test_0.csv => test_0_skip_column_3_rblock_output.xlsx'''
+        test_number = 0
+        num_expected_tables = 1
+        num_expected_blocks = 2
+        expected_flag = ['minor', 'minor']
+        self.compare_conversion(test_number, expected_flag, num_expected_tables, num_expected_blocks,
+            overwrite_expect=os.path.join(self.data_dir, "test_0_skip_column_3_rblock_output"),
+            skippable_columns={0: [3]}, compare_raw=True)
 
     def test_offset_multi_title(self):
         '''Test test_1.csv => test_1_output.csv'''
@@ -190,8 +242,7 @@ class TableAnalyzerTest(unittest.TestCase):
         num_expected_tables = 1
         num_expected_blocks = 2
         expected_flag = ['interpreted', 'interpreted']
-        self.compare_conversion(test_number, expected_flag,
-                               num_expected_tables, num_expected_blocks)
+        self.compare_conversion(test_number, expected_flag, num_expected_tables, num_expected_blocks)
 
     def test_ultimate_sheet(self):
         '''Test test_11.csv => test_11_output.xlsx'''
