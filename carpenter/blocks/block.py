@@ -2,6 +2,7 @@
 import parentpath
 
 import re
+import sys
 from flagable import Flagable
 from cellanalyzer import is_empty_cell, is_text_cell, is_num_cell, get_cell_type, check_cell_type
 from datawrap.tablewrap import TableTranspose
@@ -15,32 +16,36 @@ class InvalidBlockError(ValueError):
 
 class TableBlock(Flagable):
     '''
-    Represents a sub-table of a data file worksheet. This provides
-    functionality for converting to row-titled tables for exporting
-    to csv files.
+    Represents a sub-table of a data file worksheet. This provides functionality for converting to
+    row-titled tables for exporting to csv files.
     '''
     def __init__(self, table_conversion, used_cells, block_start, block_end,
-                 worksheet=None, flags=None, units=None, complete_block=False):
+            worksheet=None, flags=None, units=None, complete_block=False,
+            max_title_rows=sys.maxint / 2):
         '''
-        Constructor throws an InvalidBlockError if the block is not
-        valid or convertible to a valid configuration.
+        Constructor throws an InvalidBlockError if the block is not valid or convertible to a valid
+        configuration.
 
         Args:
-            complete_block: Tells the validator to assume every cell is
-                filled in the block, which speeds up checks
+            complete_block: Tells the validator to assume every cell is filled in the block, which
+                speeds up checks.
+            max_title_rows: Restricts the title detector to stop looking for titles after
+                max_title_rows rows.
         '''
         self.table = table_conversion
         self.used = used_cells
         self.start = block_start
         self.end = block_end
         self.complete_block = complete_block
+        self.max_title_row = min(self.end[0], self.start[0] + int(max_title_rows))
         self.flags = flags if flags != None else {}
         self.units = units if units != None else {}
         self.worksheet = worksheet
         validator = BlockValidator(self.table, self.worksheet,
                                    self.flags, self.used,
                                    self.start, self.end,
-                                   complete_block=self.complete_block)
+                                   complete_block=self.complete_block,
+                                   max_title_rows=max_title_rows)
         if not validator.validate_block():
             raise InvalidBlockError()
 
@@ -72,8 +77,7 @@ class TableBlock(Flagable):
 
     def copy_raw_block(self):
         '''
-        Copies the block as it was originally specified by start and
-        end into a new table.
+        Copies the block as it was originally specified by start and end into a new table.
 
         Returns:
             A copy of the block with no block transformations.
@@ -94,9 +98,8 @@ class TableBlock(Flagable):
 
     def copy_numbered_block(self):
         '''
-        Copies the block as it was originally specified by start and
-        end into a new table. Additionally inserts the original table
-        indices in the first row of the block.
+        Copies the block as it was originally specified by start and end into a new table.
+        Additionally inserts the original table indices in the first row of the block.
 
         Returns:
             A copy of the block with no block transformations.
@@ -108,9 +111,8 @@ class TableBlock(Flagable):
 
     def convert_to_row_table(self, add_units=True):
         '''
-        Converts the block into row titled elements. These elements are
-        copied into the return table, which can be much longer than the
-        original block.
+        Converts the block into row titled elements. These elements are copied into the return
+        table, which can be much longer than the  original block.
 
         Args:
             add_units: Indicates if units should be appened to each row item.
@@ -126,7 +128,7 @@ class TableBlock(Flagable):
         for row_index in range(self.start[0], self.end[0]):
             for column_index in range(self.start[1], self.end[1]):
                 cell = self.table[row_index][column_index]
-                if cell != None and isinstance(cell, (int, float)):
+                if cell != None and isinstance(cell, (int, float, long)):
                     titles = self._find_titles(row_index, column_index)
                     titles.append(cell)
                     if add_units:
@@ -212,8 +214,8 @@ class TableBlock(Flagable):
 
     def get_worst_flag_level(self):
         '''
-        Determines the worst flag present in the provided flags. If no
-        flags are given then a 'minor' value is returned.
+        Determines the worst flag present in the provided flags. If no flags are given then a
+        'minor' value is returned.
 
         No argument version of parent function.
         '''
@@ -221,18 +223,17 @@ class TableBlock(Flagable):
 
 class BlockValidator(Flagable):
     '''
-    The block validator checks and repairs the defined block within a
-    table. The validate method performs the check and repair process.
-    If the block cannot be repaired then validate will return false.
+    The block validator checks and repairs the defined block within a table. The validate method
+    performs the check and repair process. If the block cannot be repaired then validate will return
+    false.
 
-    The validation process is fairly complicated to catch all edge
-    cases correctly. There are inherent structures within data sets
-    which have implied meaning. These implied states are converted
-    when detected. Others are ambiguous and a common case decision
-    is made or the valid return is set to False.
+    The validation process is fairly complicated to catch all edge cases correctly. There are
+    inherent structures within data sets which have implied meaning. These implied states are
+    converted when detected. Others are ambiguous and a common case decision is made or the valid
+    return is set to False.
     '''
-    def __init__(self, table, worksheet, flags, used_cells,
-                 block_start, block_end, complete_block=False):
+    def __init__(self, table, worksheet, flags, used_cells, block_start, block_end,
+            complete_block=False, max_title_rows=sys.maxint / 2):
         self.table = table
         self.worksheet = worksheet
         self.flags = flags
@@ -240,15 +241,15 @@ class BlockValidator(Flagable):
         self.start = block_start
         self.end = block_end
         self.complete_block = complete_block
+        self.max_title_row = min(self.end[0], self.start[0] + max_title_rows)
 
     def validate_block(self):
         '''
-        This method is a multi-stage process which repairs row titles, then
-        repairs column titles, then checks for invalid rows, and finally
-        for invalid columns.
+        This method is a multi-stage process which repairs row titles, then repairs column titles,
+        then checks for invalid rows, and finally for invalid columns.
 
-        This maybe should have been written via state machines... Also suggested
-        as being possibly written with code-injection.
+        This maybe should have been written via state machines... Also suggested as being possibly
+        written with code-injection.
         '''
         # Don't allow for 0 width or 0 height blocks
         if self._check_zero_size():
@@ -301,8 +302,8 @@ class BlockValidator(Flagable):
 
     def _repair_row(self):
         '''
-        Searches for missing titles that can be inferred from the
-        surrounding data and automatically repairs those titles.
+        Searches for missing titles that can be inferred from the surrounding data and automatically
+        repairs those titles.
         '''
         # Repair any title rows
         check_for_title = True
@@ -342,15 +343,10 @@ class BlockValidator(Flagable):
 
     def _fill_row_holes(self):
         '''
-        Fill any remaining row title cells that are empty.
-        This must be done after the other passes to avoid
-        preemptively filling in empty cells reserved for
-        other operations.
-
-        TODO potential optimization, mark rows/columns that
-        were already processed and skip them here.
+        Fill any remaining row title cells that are empty. This must be done after the other passes
+        to avoid preemptively filling in empty cells reserved for other operations.
         '''
-        for row_index in range(self.start[0], self.end[0]):
+        for row_index in range(self.start[0], self.max_title_row):
             table_row = self.table[row_index]
             row_start = table_row[self.start[1]]
             if is_text_cell(row_start):
@@ -368,8 +364,8 @@ class BlockValidator(Flagable):
 
     def _validate_rows(self):
         '''
-        Checks for any missing data row by row. It also checks for
-        changes in cell type and flags multiple switches as an error.
+        Checks for any missing data row by row. It also checks for changes in cell type and flags
+        multiple switches as an error.
         '''
         for row_index in range(self.start[0], self.end[0]):
             table_row = self.table[row_index]
@@ -397,8 +393,8 @@ class BlockValidator(Flagable):
 
     def _validate_columns(self):
         '''
-        Same as _validate_rows but for columns. Also ignore used_cells as
-        _validate_rows should update used_cells.
+        Same as _validate_rows but for columns. Also ignore used_cells as _validate_rows should
+        update used_cells.
         '''
         for column_index in range(self.start[1], self.end[1]):
             table_column = TableTranspose(self.table)[column_index]
@@ -420,8 +416,7 @@ class BlockValidator(Flagable):
 
     def _stringify_row(self, row_index):
         '''
-        Stringifies an entire row, filling in blanks with prior titles as they
-        are found.
+        Stringifies an entire row, filling in blanks with prior titles as they are found.
         '''
         table_row = self.table[row_index]
         prior_cell = None
@@ -445,12 +440,12 @@ class BlockValidator(Flagable):
 
     def _check_interpret_cell(self, cell, prior_cell, row_index, column_index):
         '''
-        Helper function which checks cell type and performs cell translation to
-        strings where necessary.
+        Helper function which checks cell type and performs cell translation to strings where
+        necessary.
 
         Returns:
-            A tuple of the form '(cell, changed)' where 'changed' indicates if
-            'cell' differs from input.
+            A tuple of the form '(cell, changed)' where 'changed' indicates if 'cell' differs from
+            input.
         '''
         changed = False
         if (not is_empty_cell(cell) and
@@ -469,8 +464,8 @@ class BlockValidator(Flagable):
 
     def _check_fill_title_row(self, row_index):
         '''
-        Checks the given row to see if it is all titles and fills any
-        blanks cells if that is the case.
+        Checks the given row to see if it is all titles and fills any blanks cells if that is the
+        case.
         '''
         table_row = self.table[row_index]
         # Determine if the whole row is titles
@@ -496,13 +491,12 @@ class BlockValidator(Flagable):
 
     def _check_stringify_year_row(self, row_index):
         '''
-        Checks the given row to see if it is labeled year data and fills
-        any blank years within that data.
+        Checks the given row to see if it is labeled year data and fills any blank years within that
+        data.
         '''
         table_row = self.table[row_index]
         # State trackers
         prior_year = None
-        increasing_years = None
         for column_index in range(self.start[1]+1, self.end[1]):
             current_year = table_row[column_index]
             # Quit if we see
@@ -522,7 +516,6 @@ class BlockValidator(Flagable):
         table_column = TableTranspose(self.table)[column_index]
         # State trackers
         prior_year = None
-        increasing_years = None
         for row_index in range(self.start[0]+1, self.end[0]):
             current_year = table_column[row_index]
             if not self._check_years(current_year, prior_year):
@@ -536,9 +529,8 @@ class BlockValidator(Flagable):
 
     def _check_years(self, cell, prior_year):
         '''
-        Helper method which defines the rules for checking for
-        existence of a year indicator. If the cell is blank then
-        prior_year is used to determine validity.
+        Helper method which defines the rules for checking for existence of a year indicator. If the
+        cell is blank then prior_year is used to determine validity.
         '''
         # Anything outside these values shouldn't auto
         # categorize to strings
